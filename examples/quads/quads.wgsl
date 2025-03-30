@@ -1,4 +1,6 @@
-#import bevy_render::view View
+#import bevy_render::{
+    view::View,
+}
 
 struct Quad {
     center: vec3<f32>,
@@ -43,7 +45,7 @@ fn vertex(@builtin(vertex_index) vertex_index: u32) -> VertexOutput {
 
     if ((quad.flags & QUAD_FLAG_BILLBOARD_BIT) != 0u) {
         // View-right in world space is the 0th column of the view matrix
-        let right = normalize(view.view[0].xyz);
+        let right = normalize(view.world_from_view[0].xyz);
         var up: vec3<f32>;
         if ((quad.flags & QUAD_FLAG_BILLBOARD_WORLD_Y_BIT) != 0u) {
             // The world-space normal has only x and z components
@@ -54,7 +56,7 @@ fn vertex(@builtin(vertex_index) vertex_index: u32) -> VertexOutput {
             // The world-space normal points from the quad center to the camera
             out.world_normal = normalize(view.world_position - quad.center);
             // View-up in world space is the 1st column of the view matrix
-            up = normalize(view.view[1].xyz);
+            up = normalize(view.world_from_view[1].xyz);
         }
         // Calculate the world-space offset in the right and up directions by the respective half
         // extents
@@ -63,10 +65,10 @@ fn vertex(@builtin(vertex_index) vertex_index: u32) -> VertexOutput {
         // Apply the world-space offset
         out.world_position = vec4<f32>(quad.center.xyz + relative_pos, 1.0);
         // Transform to clip space
-        out.clip_position = view.view_proj * out.world_position;
+        out.clip_position = view.clip_from_world * out.world_position;
     } else if ((quad.flags & QUAD_FLAG_BILLBOARD_FIXED_SCREEN_SIZE_BIT) != 0u) {
         // Transform the quad center position to clip space
-        out.clip_position = view.view_proj * vec4<f32>(quad.center, 1.0);
+        out.clip_position = view.clip_from_world * vec4<f32>(quad.center, 1.0);
         // Clip to normalized device coordinate space
         out.clip_position = out.clip_position / out.clip_position.w;
 
@@ -76,7 +78,7 @@ fn vertex(@builtin(vertex_index) vertex_index: u32) -> VertexOutput {
         out.clip_position.y = out.clip_position.y + (quad.half_extents.y / view.viewport.w) * relative_pos_unit.y;
 
         // Transform back to world coordinates
-        out.world_position = view.inverse_projection * out.clip_position;
+        out.world_position = view.view_from_clip * out.clip_position;
         out.world_position = out.world_position / out.world_position.w;
         // The world-space normal points from the quad center to the camera
         out.world_normal = normalize(view.world_position - quad.center);
@@ -89,7 +91,7 @@ fn vertex(@builtin(vertex_index) vertex_index: u32) -> VertexOutput {
         // Apply the world-space offset
         out.world_position = vec4<f32>(quad.center.xyz + relative_pos, 1.0);
         // Transform to clip space
-        out.clip_position = view.view_proj * out.world_position;
+        out.clip_position = view.clip_from_world * out.world_position;
     }
 
     out.color = quad.color;

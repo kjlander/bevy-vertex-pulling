@@ -1,4 +1,5 @@
 use bevy::input::mouse::MouseMotion;
+use bevy::input::ButtonInput;
 use bevy::prelude::*;
 
 /// Simple flying camera plugin.
@@ -68,12 +69,12 @@ impl Default for CameraController {
             enabled: true,
             initialized: false,
             sensitivity: 0.5,
-            key_forward: KeyCode::W,
-            key_back: KeyCode::S,
-            key_left: KeyCode::A,
-            key_right: KeyCode::D,
-            key_up: KeyCode::E,
-            key_down: KeyCode::Q,
+            key_forward: KeyCode::KeyW,
+            key_back: KeyCode::KeyS,
+            key_left: KeyCode::KeyA,
+            key_right: KeyCode::KeyD,
+            key_up: KeyCode::KeyE,
+            key_down: KeyCode::KeyQ,
             key_run: KeyCode::ShiftLeft,
             key_enable_mouse: MouseButton::Left,
             walk_speed: 5.0,
@@ -99,11 +100,11 @@ pub fn print_controls(controller: Query<&CameraController>, mut controls_printed
 pub fn camera_controller(
     time: Res<Time>,
     mut mouse_events: EventReader<MouseMotion>,
-    mouse_button_input: Res<Input<MouseButton>>,
-    key_input: Res<Input<KeyCode>>,
+    mouse_button_input: Res<ButtonInput<MouseButton>>,
+    key_input: Res<ButtonInput<KeyCode>>,
     mut query: Query<(&mut Transform, &mut CameraController), With<Camera>>,
 ) {
-    let dt = time.delta_seconds();
+    let dt = time.delta_secs();
 
     if let Ok((mut transform, mut options)) = query.get_single_mut() {
         if !options.initialized {
@@ -161,7 +162,7 @@ pub fn camera_controller(
         // Handle mouse input
         let mut mouse_delta = Vec2::ZERO;
         if mouse_button_input.pressed(options.key_enable_mouse) {
-            for mouse_event in mouse_events.iter() {
+            for mouse_event in mouse_events.read() {
                 mouse_delta += mouse_event.delta;
             }
         }

@@ -11,10 +11,11 @@ bevy_ci_testing = ["bevy/bevy_ci_testing"]
 trace_tracy = ["bevy/trace_tracy"]
 
 [dependencies]
-bevy = "0.11"
+bevy = "0.15.3"
 bitflags = "2.1.0"
+nonmax = "0.5.5"
 
 [dev-dependencies]
 bytemuck = "1.9.1"
-examples_utils = { path = "examples_utils", version = "0.8.0-dev" }
+examples_utils = { path = "examples_utils", version = "0.15.3-dev" }
 rand = "0.8.5"
